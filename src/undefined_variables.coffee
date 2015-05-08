@@ -163,7 +163,8 @@ module.exports = class
         # Get the complexity of the current node.
         name = node.constructor.name
 
-        # Sets errorVariable from Try node for second block
+        # Set errorVariable from Try node for second block
+        # TODO: remove from @forceCatchVars if @level less than Try node level
         if name is 'Block' && @forceCatchVars[@level]?
             if @forceCatchVars[@level].blocks == 1
                 @newVariable @forceCatchVars[@level].variable
