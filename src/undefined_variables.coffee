@@ -163,6 +163,14 @@ module.exports = class
         # Get the complexity of the current node.
         name = node.constructor.name
 
+        # Sets errorVariable from Try node for second block
+        if name is 'Block' && @forceCatchVars[@level]?
+            if @forceCatchVars[@level].blocks == 1
+                @newVariable @forceCatchVars[@level].variable
+                @forceCatchVars[@level] = null
+            else
+                @forceCatchVars[@level].blocks++
+
         switch name
             when 'Assign' then @lintAssign node
             # when 'Block' then @lintBlock node
@@ -252,8 +260,12 @@ module.exports = class
             else
                 @destructure o
 
-    lintTry: ->
-        # TODO: Figure out how to find out the varible name for the catch block
+    lintTry: (node) ->
+        if node.errorVariable?
+            @forceCatchVars[@level + 1] = {
+                variable: { base: node.errorVariable }
+                blocks: 0 # blocks counter, the variable is for second block which is `catch`
+            }
 
     lintBlock: (node) ->
         # IDK if I like this, it modifies the AST.
@@ -341,8 +353,10 @@ module.exports = class
             @checkExists node.second.base
 
     level: 0
-    lintChildren: (node) ->
 
+    forceCatchVars: []
+
+    lintChildren: (node) ->
         @level++
         node.eachChild (childNode) =>
             @lintNode(childNode) if childNode
