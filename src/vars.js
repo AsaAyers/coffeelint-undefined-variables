@@ -586,3 +586,13 @@ exports.yui = {
 	YUI_config: false
 };
 
+exports.angular = {
+	angular: false
+};
+
+exports.underscore = {
+	_: false
+};
+exports.jsRoutes = {
+	Routes: false
+};
