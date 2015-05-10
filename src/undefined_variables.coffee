@@ -20,6 +20,7 @@ module.exports = class
             cfg
 
         globals: []
+        disableCommentsLinting: false
 
     lintAST : (node, @astApi) ->
         @depth = 0
@@ -163,6 +164,15 @@ module.exports = class
         # Get the complexity of the current node.
         name = node.constructor.name
 
+        # Set errorVariable from Try node for second block
+        # TODO: remove from @forceCatchVars if @level less than Try node level
+        if name is 'Block' && @forceCatchVars[@level]?
+            if @forceCatchVars[@level].blocks == 1
+                @newVariable @forceCatchVars[@level].variable
+                @forceCatchVars[@level] = null
+            else
+                @forceCatchVars[@level].blocks++
+
         switch name
             when 'Assign' then @lintAssign node
             # when 'Block' then @lintBlock node
@@ -252,8 +262,12 @@ module.exports = class
             else
                 @destructure o
 
-    lintTry: ->
-        # TODO: Figure out how to find out the varible name for the catch block
+    lintTry: (node) ->
+        if node.errorVariable?
+            @forceCatchVars[@level + 1] = {
+                variable: { base: node.errorVariable }
+                blocks: 0 # blocks counter, the variable is for second block which is `catch`
+            }
 
     lintBlock: (node) ->
         # IDK if I like this, it modifies the AST.
@@ -294,6 +308,8 @@ module.exports = class
                 lastParam = param.name.value
 
     lintComment: (node) ->
+        return if @astApi.config[@rule.name].disableCommentsLinting
+
         # http://stackoverflow.com/a/3537914/35247
         # JS Regex doesn't support capturing all of a repeating group.
         commentRegex = ///
@@ -341,8 +357,10 @@ module.exports = class
             @checkExists node.second.base
 
     level: 0
-    lintChildren: (node) ->
 
+    forceCatchVars: []
+
+    lintChildren: (node) ->
         @level++
         node.eachChild (childNode) =>
             @lintNode(childNode) if childNode
