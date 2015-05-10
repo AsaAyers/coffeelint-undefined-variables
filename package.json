@@ -1,6 +1,6 @@
 {
   "name": "coffeelint-undefined-variables",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Identifies undefined or unused variables.",
   "main": "index.js",
   "scripts": {
