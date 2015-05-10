@@ -20,7 +20,7 @@ module.exports = class
             cfg
 
         globals: []
-        noCommentLinting: false
+        disableCommentsLinting: false
 
     lintAST : (node, @astApi) ->
         @depth = 0
@@ -308,7 +308,7 @@ module.exports = class
                 lastParam = param.name.value
 
     lintComment: (node) ->
-        return if @astApi.config[@rule.name].noCommentLinting
+        return if @astApi.config[@rule.name].disableCommentsLinting
 
         # http://stackoverflow.com/a/3537914/35247
         # JS Regex doesn't support capturing all of a repeating group.
